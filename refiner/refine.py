@@ -46,16 +46,16 @@ class Refiner:
         
         # Standardize column names to match real Netflix format
         column_mapping = {
-            'start time': 'start_time',
-            'duration': 'duration',
-            'title': 'title',
-            'profile name': 'profile_name',
-            'device type': 'device_type',
-            'country': 'country',
-            'bookmark': 'bookmark',
-            'latest bookmark': 'latest_bookmark',
-            'supplemental video type': 'supplemental_video_type',
-            'attributes': 'attributes'
+            'Start Time': 'start_time',
+            'Duration': 'duration',
+            'Title': 'title',
+            'Profile Name': 'profile_name',
+            'Device Type': 'device_type',
+            'Country': 'country',
+            'Bookmark': 'bookmark',
+            'Latest Bookmark': 'latest_bookmark',
+            'Supplemental Video Type': 'supplemental_video_type',
+            'Attributes': 'attributes'
         }
         
         df = df.rename(columns=column_mapping)
@@ -74,23 +74,23 @@ class Refiner:
         
         # Standardize column names to match real Netflix format
         column_mapping = {
-            'transaction date': 'transaction_date',
-            'country': 'country',
-            'mop last 4': 'mop_last_4',
-            'final invoice result': 'final_invoice_result',
-            'mop pmt processor desc': 'mop_pmt_processor_desc',
-            'pmt txn type': 'pmt_txn_type',
-            'description': 'description',
-            'gross sale amt': 'gross_sale_amt',
-            'pmt status': 'pmt_status',
-            'payment type': 'payment_type',
-            'tax amt': 'tax_amt',
-            'service period start date': 'service_period_start_date',
-            'item price amt': 'item_price_amt',
-            'mop creation date': 'mop_creation_date',
-            'currency': 'currency',
-            'next billing date': 'next_billing_date',
-            'service period end date': 'service_period_end_date'
+            'Transaction Date': 'transaction_date',
+            'Country': 'country',
+            'Mop Last 4': 'mop_last_4',
+            'Final Invoice Result': 'final_invoice_result',
+            'Mop Pmt Processor Desc': 'mop_pmt_processor_desc',
+            'Pmt Txn Type': 'pmt_txn_type',
+            'Description': 'description',
+            'Gross Sale Amt': 'gross_sale_amt',
+            'Pmt Status': 'pmt_status',
+            'Payment Type': 'payment_type',
+            'Tax Amt': 'tax_amt',
+            'Service Period Start Date': 'service_period_start_date',
+            'Item Price Amt': 'item_price_amt',
+            'Mop Creation Date': 'mop_creation_date',
+            'Currency': 'currency',
+            'Next Billing Date': 'next_billing_date',
+            'Service Period End Date': 'service_period_end_date'
         }
         
         df = df.rename(columns=column_mapping)
