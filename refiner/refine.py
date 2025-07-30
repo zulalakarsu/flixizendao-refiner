@@ -167,10 +167,9 @@ class Refiner:
                     else:
                         logging.warning(f"Unknown file type for {input_filename}")
 
-        # Load schema from file
+        # Load → stringify so pydantic gets a str, not a dict
         schema_file = os.path.join(settings.BASE_DIR, 'schema.json')
-        with open(schema_file, 'r') as f:
-            schema_data = json.load(f)
+        schema_json = Path(schema_file).read_text()  # <-- string
         
         # Create schema object
         schema = OffChainSchema(
@@ -178,7 +177,7 @@ class Refiner:
             version="1.0.0",
             description="Netflix viewing activity and billing history data",
             dialect="sqlite",
-            schema=schema_data
+            schema=schema_json  # <-- pass the string
         )
         output.schema = schema
         
