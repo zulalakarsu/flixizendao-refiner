@@ -5,6 +5,11 @@ from typing import Optional
 class Settings(BaseSettings):
     """Global settings configuration using environment variables"""
     
+    BASE_DIR: str = Field(
+        default="/app",
+        description="Base directory containing schema and other files"
+    )
+    
     INPUT_DIR: str = Field(
         default="/input",
         description="Directory containing input files to process"
@@ -20,18 +25,23 @@ class Settings(BaseSettings):
         description="Key to symmetrically encrypt the refinement. This is derived from the original file encryption key"
     )
     
+    WALLET_ADDRESS: Optional[str] = Field(
+        default=None,
+        description="Wallet address for consistent account_id generation"
+    )
+    
     SCHEMA_NAME: str = Field(
-        default="Google Drive Analytics",
+        default="Netflix CSV Analytics",
         description="Name of the schema"
     )
     
     SCHEMA_VERSION: str = Field(
-        default="0.0.1",
+        default="1.0.0",
         description="Version of the schema"
     )
     
     SCHEMA_DESCRIPTION: str = Field(
-        default="Schema for the Google Drive DLP, representing some basic analytics of the Google user",
+        default="Schema for Netflix viewing activity and billing history data",
         description="Description of the schema"
     )
     

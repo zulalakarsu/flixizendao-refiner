@@ -1,0 +1,42 @@
+{
+  "tables": {
+    "viewing_activity": {
+      "columns": {
+        "account_id": "TEXT",
+        "duration": "TEXT",
+        "duration_sec": "INTEGER",
+        "start_time": "TEXT",
+        "profile_name": "TEXT",
+        "country": "TEXT",
+        "bookmark": "TEXT",
+        "latest_bookmark": "TEXT",
+        "supplemental_video_type": "TEXT",
+        "attributes": "TEXT",
+        "device_type": "TEXT",
+        "title": "TEXT"
+      }
+    },
+    "billing_history": {
+      "columns": {
+        "account_id": "TEXT",
+        "transaction_date": "TEXT",
+        "country": "TEXT",
+        "mop_last_4": "TEXT",
+        "final_invoice_result": "TEXT",
+        "mop_pmt_processor_desc": "TEXT",
+        "pmt_txn_type": "TEXT",
+        "description": "TEXT",
+        "gross_sale_amt": "REAL",
+        "pmt_status": "TEXT",
+        "payment_type": "TEXT",
+        "tax_amt": "REAL",
+        "service_period_start_date": "TEXT",
+        "item_price_amt": "REAL",
+        "mop_creation_date": "TEXT",
+        "currency": "TEXT",
+        "next_billing_date": "TEXT",
+        "service_period_end_date": "TEXT"
+      }
+    }
+  }
+} 
