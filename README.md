@@ -79,11 +79,25 @@ IPFS_GATEWAY_URL=https://gateway.pinata.cloud/ipfs
 
 ## Local Development
 
-To run the refinement locally for testing:
+### Setup Python Environment
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # On macOS/Linux
+# or
+.venv\Scripts\activate     # On Windows
+
+# Install dependencies
+pip install --no-cache-dir -r requirements.txt
+```
+
+### Running the Refiner
 
 ```bash
 # With Python
-pip install --no-cache-dir -r requirements.txt
 python -m refiner
 
 # Or with Docker
