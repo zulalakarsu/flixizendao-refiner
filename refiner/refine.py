@@ -167,17 +167,57 @@ class Refiner:
                     else:
                         logging.warning(f"Unknown file type for {input_filename}")
 
-        # Load → stringify so pydantic gets a str, not a dict
-        schema_file = os.path.join(settings.BASE_DIR, 'schema.json')
-        schema_json = Path(schema_file).read_text()  # <-- string
+        # Generate Netflix schema dynamically to ensure correct schema
+        netflix_schema = {
+            "tables": {
+                "viewing_activity": {
+                    "columns": {
+                        "account_id": "TEXT",
+                        "duration": "TEXT",
+                        "duration_sec": "INTEGER",
+                        "start_time": "TEXT",
+                        "profile_name": "TEXT",
+                        "country": "TEXT",
+                        "bookmark": "TEXT",
+                        "latest_bookmark": "TEXT",
+                        "supplemental_video_type": "TEXT",
+                        "attributes": "TEXT",
+                        "device_type": "TEXT",
+                        "title": "TEXT"
+                    }
+                },
+                "billing_history": {
+                    "columns": {
+                        "account_id": "TEXT",
+                        "transaction_date": "TEXT",
+                        "country": "TEXT",
+                        "mop_last_4": "TEXT",
+                        "final_invoice_result": "TEXT",
+                        "mop_pmt_processor_desc": "TEXT",
+                        "pmt_txn_type": "TEXT",
+                        "description": "TEXT",
+                        "gross_sale_amt": "REAL",
+                        "pmt_status": "TEXT",
+                        "payment_type": "TEXT",
+                        "tax_amt": "REAL",
+                        "service_period_start_date": "TEXT",
+                        "item_price_amt": "REAL",
+                        "mop_creation_date": "TEXT",
+                        "currency": "TEXT",
+                        "next_billing_date": "TEXT",
+                        "service_period_end_date": "TEXT"
+                    }
+                }
+            }
+        }
         
-        # Create schema object
+        # Create schema object with correct Netflix schema
         schema = OffChainSchema(
             name="netflix-csv",
             version="1.0.0",
             description="Netflix viewing activity and billing history data",
             dialect="sqlite",
-            schema=schema_json  # <-- pass the string
+            schema=json.dumps(netflix_schema)  # <-- use generated schema
         )
         output.schema = schema
         
