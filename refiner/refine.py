@@ -24,19 +24,38 @@ class Refiner:
         """Detect if CSV is viewing activity or billing history."""
         columns = {col.lower().strip() for col in df.columns}
         
-        # Real Netflix viewing activity indicators
-        viewing_indicators = {'start time', 'duration', 'title', 'profile name', 'device type', 'bookmark'}
-        # Real Netflix billing history indicators  
-        billing_indicators = {'transaction date', 'gross sale amt', 'currency', 'payment type', 'pmt status'}
+        # Netflix viewing activity indicators (actual column names)
+        viewing_indicators = {
+            'start time', 'duration', 'title', 'profile name', 'device type', 'bookmark',
+            'start_time', 'duration', 'title', 'profile_name', 'device_type', 'bookmark',
+            'latest bookmark', 'latest_bookmark', 'supplemental video type', 'supplemental_video_type',
+            'attributes', 'country', 'profile', 'device', 'time', 'name'
+        }
+        
+        # Netflix billing history indicators (actual column names)
+        billing_indicators = {
+            'transaction date', 'gross sale amt', 'currency', 'payment type', 'pmt status',
+            'transaction_date', 'gross_sale_amt', 'currency', 'payment_type', 'pmt_status',
+            'mop last 4', 'mop_last_4', 'final invoice result', 'final_invoice_result',
+            'mop pmt processor desc', 'mop_pmt_processor_desc', 'pmt txn type', 'pmt_txn_type',
+            'description', 'tax amt', 'tax_amt', 'service period start date', 'service_period_start_date',
+            'item price amt', 'item_price_amt', 'mop creation date', 'mop_creation_date',
+            'next billing date', 'next_billing_date', 'service period end date', 'service_period_end_date',
+            'transaction', 'billing', 'payment', 'invoice', 'amount', 'price'
+        }
         
         viewing_score = len(columns & viewing_indicators)
         billing_score = len(columns & billing_indicators)
+        
+        logging.info(f"File detection - Columns found: {list(columns)}")
+        logging.info(f"Viewing score: {viewing_score}, Billing score: {billing_score}")
         
         if viewing_score > billing_score:
             return 'viewing'
         elif billing_score > viewing_score:
             return 'billing'
         else:
+            logging.warning(f"Could not determine file type. Columns: {list(columns)}")
             return 'unknown'
 
     def _process_viewing_activity(self, df: pd.DataFrame, account_id: str) -> pd.DataFrame:
@@ -141,16 +160,22 @@ class Refiner:
         
         # Create SQLite database
         with sqlite3.connect(self.db_path) as conn:
-            for input_filename in os.listdir(settings.INPUT_DIR):
+            # Debug: Check what files are in input directory
+            input_files = os.listdir(settings.INPUT_DIR)
+            logging.info(f"Found {len(input_files)} files in input directory: {input_files}")
+            
+            for input_filename in input_files:
                 input_file = os.path.join(settings.INPUT_DIR, input_filename)
                 if os.path.splitext(input_file)[1].lower() == '.csv':
                     logging.info(f"Processing {input_filename}")
                     
                     # Read CSV file
                     df = pd.read_csv(input_file)
+                    logging.info(f"Loaded CSV with {len(df)} rows and columns: {list(df.columns)}")
                     
                     # Detect file type
                     file_type = self._detect_file_type(df)
+                    logging.info(f"Detected file type: {file_type}")
                     
                     if file_type == 'viewing':
                         # Process viewing activity
@@ -165,7 +190,42 @@ class Refiner:
                         logging.info(f"Added {len(processed_df)} billing history records")
                         
                     else:
-                        logging.warning(f"Unknown file type for {input_filename}")
+                        logging.warning(f"Unknown file type for {input_filename}, attempting fallback processing")
+                        # Fallback: try to process as viewing activity first
+                        try:
+                            processed_df = self._process_viewing_activity(df, account_id)
+                            processed_df.to_sql("viewing_activity", conn, if_exists="append", index=False)
+                            logging.info(f"Fallback: Added {len(processed_df)} viewing activity records")
+                        except Exception as e:
+                            logging.warning(f"Fallback viewing processing failed: {e}")
+                            # Try billing processing as second fallback
+                            try:
+                                processed_df = self._process_billing_history(df, account_id)
+                                processed_df.to_sql("billing_history", conn, if_exists="append", index=False)
+                                logging.info(f"Fallback: Added {len(processed_df)} billing history records")
+                            except Exception as e2:
+                                logging.error(f"All fallback processing failed: {e2}")
+                                # Last resort: just add the raw data
+                                df['account_id'] = account_id
+                                df.to_sql("raw_data", conn, if_exists="append", index=False)
+                                logging.info(f"Added {len(df)} raw data records as last resort")
+                else:
+                    logging.info(f"Skipping non-CSV file: {input_filename}")
+            
+            # Debug: Check database size after processing
+            db_size = os.path.getsize(self.db_path)
+            logging.info(f"Database size after processing: {db_size} bytes")
+            
+            # Debug: Check table contents
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = cursor.fetchall()
+            logging.info(f"Tables in database: {[table[0] for table in tables]}")
+            
+            for table in tables:
+                cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
+                count = cursor.fetchone()[0]
+                logging.info(f"Table {table[0]}: {count} rows")
 
         # Generate Netflix schema dynamically to ensure correct schema
         netflix_schema = {
@@ -225,9 +285,19 @@ class Refiner:
         schema_ipfs_hash = upload_json_to_ipfs(schema.model_dump())
         logging.info(f"Schema uploaded to IPFS with hash: {schema_ipfs_hash}")
         
+        # Debug: Check database before encryption
+        db_size_before = os.path.getsize(self.db_path)
+        logging.info(f"Database size before encryption: {db_size_before} bytes")
+        
         # Encrypt and upload database to IPFS
         encrypted_path = encrypt_file(settings.REFINEMENT_ENCRYPTION_KEY, self.db_path)
+        
+        # Debug: Check encrypted file size
+        encrypted_size = os.path.getsize(encrypted_path)
+        logging.info(f"Encrypted file size: {encrypted_size} bytes")
+        
         ipfs_hash = upload_file_to_ipfs(encrypted_path)
+        logging.info(f"Uploaded to IPFS with hash: {ipfs_hash}")
         output.refinement_url = f"{settings.IPFS_GATEWAY_URL}/{ipfs_hash}"
         
         logging.info("Netflix CSV data transformation completed successfully")
