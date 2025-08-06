@@ -18,6 +18,8 @@ def encrypt_file(encryption_key: str, file_path: str, output_path: str = None) -
     if output_path is None:
         output_path = f"{file_path}.pgp"
     
+    print(f"🔐 Encrypting {file_path} ({os.path.getsize(file_path)} bytes) to {output_path}")
+    
     with open(file_path, 'rb') as f:
         buffer = f.read()
     
@@ -29,6 +31,7 @@ def encrypt_file(encryption_key: str, file_path: str, output_path: str = None) -
     with open(output_path, 'wb') as f:
         f.write(str(encrypted_message).encode())
     
+    print(f"✅ Encrypted file created: {output_path} ({os.path.getsize(output_path)} bytes)")
     return output_path
 
 
