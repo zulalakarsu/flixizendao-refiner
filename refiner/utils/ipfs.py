@@ -41,12 +41,11 @@ def upload_json_to_ipfs(data):
 def upload_file_to_ipfs(file_path=None):
     """
     Uploads a file to IPFS using Pinata API (https://pinata.cloud/)
-    :param file_path: Path to the file to upload (defaults to encrypted database)
+    :param file_path: Path to the file to upload
     :return: IPFS hash
     """
     if file_path is None:
-        # Default to the encrypted database file
-        file_path = os.path.join(settings.OUTPUT_DIR, "db.libsql.pgp")
+        raise ValueError("file_path parameter is required")
     
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")

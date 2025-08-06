@@ -288,13 +288,20 @@ class Refiner:
         # Debug: Check database before encryption
         db_size_before = os.path.getsize(self.db_path)
         logging.info(f"Database size before encryption: {db_size_before} bytes")
+        print(f"Database size before encryption: {db_size_before} bytes")
         
         # Encrypt and upload database to IPFS
         encrypted_path = encrypt_file(settings.REFINEMENT_ENCRYPTION_KEY, self.db_path)
         
-        # Debug: Check encrypted file size
-        encrypted_size = os.path.getsize(encrypted_path)
-        logging.info(f"Encrypted file size: {encrypted_size} bytes")
+        # Debug: Check encrypted file size and path
+        print(f"encrypted → {encrypted_path}, exists: {os.path.exists(encrypted_path)}")
+        if encrypted_path and os.path.exists(encrypted_path):
+            encrypted_size = os.path.getsize(encrypted_path)
+            logging.info(f"Encrypted file size: {encrypted_size} bytes")
+            print(f"Encrypted file size: {encrypted_size} bytes")
+        else:
+            logging.error(f"Encrypted file not found: {encrypted_path}")
+            print(f"Encrypted file not found: {encrypted_path}")
         
         ipfs_hash = upload_file_to_ipfs(encrypted_path)
         logging.info(f"Uploaded to IPFS with hash: {ipfs_hash}")
