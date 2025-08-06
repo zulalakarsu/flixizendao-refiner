@@ -59,6 +59,9 @@ def upload_file_to_ipfs(file_path=None):
     }
 
     try:
+        size = os.path.getsize(file_path)
+        logging.info(f"⏫ Uploading {file_path} ({size} bytes) to IPFS")
+        
         with open(file_path, 'rb') as file:
             files = {
                 'file': file
